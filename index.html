@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사용자 삭제 요청</title>
+    <style>
+        input:disabled {
+            background-color: #f0f0f0;
+            color: #a0a0a0;
+        }
+    </style>
+</head>
+<body>
+    <h1>사용자 삭제 요청</h1>
+    <form id="deleteRequestForm">
+        <label for="appSelect">앱 선택:</label>
+        <select id="appSelect" name="appSelect" required>
+            <option value="">앱을 선택하세요</option>
+            <option value="앱1">뭐 내지?</option>
+            <option value="앱2">Toilet Password</option>
+            <!-- 필요에 따라 추가 -->
+        </select><br><br>
+        <label for="userEmail">이메일 (해당 앱에 가입된 이메일):</label>
+        <input type="email" id="userEmail" name="userEmail" required><br><br>
+        <label for="reason">삭제 사유:</label><br>
+        <textarea id="reason" name="reason" rows="4" cols="50" required></textarea><br><br>
+        <label for="requestTitle">제목:</label>
+        <input type="text" id="requestTitle" name="requestTitle" disabled><br><br>
+        <button type="submit">요청 보내기</button>
+    </form>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("YOUR_USER_ID"); // 환경 변수를 주입받을 자리
+        })();
+
+        document.getElementById('appSelect').addEventListener('change', function() {
+            const selectedApp = document.getElementById('appSelect').value;
+            const requestTitle = selectedApp ? `삭제 요청 - ${selectedApp}` : '';
+            document.getElementById('requestTitle').value = requestTitle;
+        });
+
+        document.getElementById('deleteRequestForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // 폼 데이터 가져오기
+            const appSelect = document.getElementById('appSelect').value;
+            const userEmail = document.getElementById('userEmail').value;
+            const reason = document.getElementById('reason').value;
+
+            // 폼 검증
+            if (!appSelect) {
+                alert('앱을 선택하세요.');
+                return;
+            }
+            if (!userEmail) {
+                alert('이메일을 입력하세요.');
+                return;
+            }
+            if (!reason) {
+                alert('삭제 이유를 입력하세요.');
+                return;
+            }
+
+            // 제목 설정
+            const requestTitle = document.getElementById('requestTitle').value;
+
+            // EmailJS를 통해 이메일 전송
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+                app_select: appSelect,
+                user_email: userEmail,
+                reason: reason,
+                request_title: requestTitle
+            }).then((response) => {
+                alert('요청이 성공적으로 전송되었습니다!');
+            }, (error) => {
+                alert('요청 전송에 실패하였습니다. 다시 시도해주세요.');
+                console.log('FAILED...', error);
+            });
+        });
+    </script>
+</body>
+</html>
