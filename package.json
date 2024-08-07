@@ -1,5 +1,5 @@
 {
-  "name": "delete_user_request",
+  "name": "user_request",
   "version": "1.0.0",
   "description": "",
   "main": "build.js",

@@ -3,84 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사용자 삭제 요청</title>
+    <title>고객 요청 센터</title>
     <style>
-        input:disabled {
-            background-color: #f0f0f0;
-            color: #a0a0a0;
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        select, input[type="email"], input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <h1>사용자 삭제 요청</h1>
-    <form id="deleteRequestForm">
+<div class="container">
+    <h1>고객 요청 센터</h1>
+    <form id="requestForm">
         <label for="appSelect">앱 선택:</label>
         <select id="appSelect" name="appSelect" required>
             <option value="">앱을 선택하세요</option>
-            <option value="뭐 내지?">뭐 내지?</option>
+            <option value="카드 뭐 내지?">카드 뭐 내지?</option>
             <option value="Toilet Password">Toilet Password</option>
             <!-- 필요에 따라 추가 -->
-        </select><br><br>
-        <label for="userEmail">위 앱에 가입된 이메일 계정:</label>
-        <input type="email" id="userEmail" name="userEmail" required><br><br>
-        <label for="reason">삭제 사유:</label><br>
-        <textarea id="reason" name="reason" rows="4" cols="50" required></textarea><br><br>
+        </select>
+
+        <label for="requestType">요청 유형:</label>
+        <select id="requestType" name="requestType" required>
+            <option value="">요청 유형을 선택하세요</option>
+            <option value="계정 삭제">계정 삭제</option>
+            <option value="기능 개선">기능 개선</option>
+            <option value="버그 신고">버그 신고</option>
+            <option value="기타 문의">기타 문의</option>
+        </select>
+
+        <label for="userEmail">이메일 주소:</label>
+        <input type="email" id="userEmail" name="userEmail" required>
+
         <label for="requestTitle">제목:</label>
-        <input type="text" id="requestTitle" name="requestTitle" disabled><br><br>
+        <input type="text" id="requestTitle" name="requestTitle" required>
+
+        <label for="requestContent">내용:</label>
+        <textarea id="requestContent" name="requestContent" rows="6" required></textarea>
+
         <button type="submit">요청 보내기</button>
     </form>
+</div>
 
-    <!-- EmailJS SDK -->
-    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function(){
-            emailjs.init("YOUR_USER_ID"); // 환경 변수를 주입받을 자리
-        })();
+<!-- EmailJS SDK -->
+<script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script type="text/javascript">
+  (function () {
+    emailjs.init("YOUR_USER_ID"); // 환경 변수를 주입받을 자리
+  })();
 
-        document.getElementById('appSelect').addEventListener('change', function() {
-            const selectedApp = document.getElementById('appSelect').value;
-            const requestTitle = selectedApp ? `삭제 요청 - ${selectedApp}` : '';
-            document.getElementById('requestTitle').value = requestTitle;
-        });
+  document.getElementById('appSelect').addEventListener('change', updateRequestTitle);
+  document.getElementById('requestType').addEventListener('change', updateRequestTitle);
 
-        document.getElementById('deleteRequestForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+  function updateRequestTitle() {
+    const selectedApp = document.getElementById('appSelect').value;
+    const selectedType = document.getElementById('requestType').value;
+    const requestTitle = selectedApp && selectedType ? `${selectedType} - ${selectedApp}` : '';
+    document.getElementById('requestTitle').value = requestTitle;
+  }
 
-            // 폼 데이터 가져오기
-            const appSelect = document.getElementById('appSelect').value;
-            const userEmail = document.getElementById('userEmail').value;
-            const reason = document.getElementById('reason').value;
+  document.getElementById('requestForm').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-            // 폼 검증
-            if (!appSelect) {
-                alert('앱을 선택하세요.');
-                return;
-            }
-            if (!userEmail) {
-                alert('이메일을 입력하세요.');
-                return;
-            }
-            if (!reason) {
-                alert('삭제 이유를 입력하세요.');
-                return;
-            }
+    const appSelect = document.getElementById('appSelect').value;
+    const requestType = document.getElementById('requestType').value;
+    const userEmail = document.getElementById('userEmail').value;
+    const requestTitle = document.getElementById('requestTitle').value;
+    const requestContent = document.getElementById('requestContent').value;
 
-            // 제목 설정
-            const requestTitle = document.getElementById('requestTitle').value;
+    if (!appSelect || !requestType || !userEmail || !requestTitle || !requestContent) {
+      alert('모든 필드를 입력해주세요.');
+      return;
+    }
 
-            // EmailJS를 통해 이메일 전송
-            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
-                app_select: appSelect,
-                user_email: userEmail,
-                reason: reason,
-                request_title: requestTitle
-            }).then((response) => {
-                alert('요청이 성공적으로 전송되었습니다!');
-            }, (error) => {
-                alert('요청 전송에 실패하였습니다. 다시 시도해주세요.');
-                console.log('FAILED...', error);
-            });
-        });
-    </script>
+    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+      app_select: appSelect,
+      request_type: requestType,
+      user_email: userEmail,
+      request_title: requestTitle,
+      request_content: requestContent
+    }).then((response) => {
+      alert('요청이 성공적으로 전송되었습니다!');
+      document.getElementById('requestForm').reset();
+    }, (error) => {
+      alert('요청 전송에 실패하였습니다. 다시 시도해주세요.');
+      console.log('FAILED...', error);
+    });
+  });
+</script>
 </body>
 </html>
